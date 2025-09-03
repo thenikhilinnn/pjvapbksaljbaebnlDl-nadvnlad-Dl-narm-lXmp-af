@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>WinGo Full Demo</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to right, #232526, #414345);
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      color: #ffcc00;
+      margin-bottom: 10px;
+    }
+    #number {
+      font-size: 90px;
+      margin: 20px;
+      font-weight: bold;
+      color: #00e676;
+      text-shadow: 0 0 20px rgba(0,255,100,0.8);
+    }
+    #timer {
+      font-size: 26px;
+      margin-bottom: 20px;
+      color: #ff4081;
+    }
+
+    .wallet {
+      font-size: 22px;
+      margin-bottom: 20px;
+      color: #00e5ff;
+    }
+
+    .bet-box {
+      margin: 20px;
+      padding: 20px;
+      border-radius: 10px;
+      background: rgba(255,255,255,0.1);
+      display: inline-block;
+    }
+
+    .input {
+      padding: 8px;
+      font-size: 16px;
+      border-radius: 5px;
+      border: none;
+      margin-top: 10px;
+      text-align: center;
+      width: 120px;
+    }
+
+    .btn {
+      padding: 12px 20px;
+      margin: 10px;
+      font-size: 18px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      color: white;
+      font-weight: bold;
+      transition: 0.3s;
+    }
+    .btn.red { background: #e53935; }
+    .btn.green { background: #43a047; }
+    .btn.blue { background: #1e88e5; }
+    .btn.yellow { background: #fdd835; color: black; }
+    .btn:hover { opacity: 0.8; }
+
+    #resultMsg {
+      font-size: 24px;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    .history {
+      margin-top: 40px;
+    }
+    .history h2 {
+      margin-bottom: 10px;
+      color: #ffcc00;
+    }
+    .results {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .ball {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: bold;
+      color: white;
+      background: #2196f3;
+      box-shadow: 0 0 10px rgba(0,0,0,0.6);
+    }
+    .ball.red { background: #e53935; }
+    .ball.green { background: #43a047; }
+    .ball.blue { background: #1e88e5; }
+    .ball.yellow { background: #fdd835; color: black; }
+  </style>
+</head>
+<body>
+  <h1>🎲 WinGo Full Demo</h1>
+  <div id="number">?</div>
+  <div id="timer">Next round in 30s</div>
+  <div class="wallet">💰 Balance: <span id="balance">1000</span></div>
+
+  <div class="bet-box">
+    <h3>Place Your Bet</h3>
+    <input type="number" id="betAmount" class="input" placeholder="Enter Amount" min="1">
+    <div>
+      <button class="btn red" onclick="placeBet('red')">Bet Red</button>
+      <button class="btn green" onclick="placeBet('green')">Bet Green</button>
+      <button class="btn blue" onclick="placeBet('blue')">Bet Blue</button>
+      <button class="btn yellow" onclick="placeBet('yellow')">Bet Yellow</button>
+    </div>
+  </div>
+
+  <div id="resultMsg"></div>
+
+  <div class="history">
+    <h2>📜 Results History</h2>
+    <div class="results" id="results"></div>
+  </div>
+
+  <script>
+    let history = [];
+    let userBet = null;
+    let betAmount = 0;
+    let balance = 1000;
+
+    function getCurrentNumber() {
+      let now = Date.now();
+      return Math.floor(now / 30000) % 10; // formula
+    }
+
+    function getColor(num) {
+      if (num % 4 === 0) return "red";
+      if (num % 4 === 1) return "green";
+      if (num % 4 === 2) return "blue";
+      return "yellow";
+    }
+
+    function placeBet(color) {
+      let amount = parseInt(document.getElementById("betAmount").value);
+      if (!amount || amount <= 0) {
+        alert("⚠️ Please enter a valid amount!");
+        return;
+      }
+      if (amount > balance) {
+        alert("⚠️ Not enough balance!");
+        return;
+      }
+      userBet = color;
+      betAmount = amount;
+      document.getElementById("resultMsg").textContent =
+        "✅ Bet Placed: " + amount + " on " + color.toUpperCase();
+    }
+
+    function update() {
+      let secLeft = 30 - Math.floor((Date.now() / 1000) % 30);
+      document.getElementById("timer").textContent =
+        "Next round in " + secLeft + "s";
+
+      if (secLeft === 30) {
+        let num = getCurrentNumber();
+        let color = getColor(num);
+        document.getElementById("number").textContent = num;
+
+        history.unshift({ num, color });
+        if (history.length > 10) history.pop();
+        renderHistory();
+
+        if (userBet) {
+          if (userBet === color) {
+            balance += betAmount;
+            document.getElementById("resultMsg").textContent =
+              "🎉 You WON! +" + betAmount + " | Number " + num + " (" + color + ")";
+          } else {
+            balance -= betAmount;
+            document.getElementById("resultMsg").textContent =
+              "❌ You LOST! -" + betAmount + " | Number " + num + " (" + color + ")";
+          }
+          document.getElementById("balance").textContent = balance;
+          userBet = null;
+          betAmount = 0;
+        }
+      }
+    }
+
+    function renderHistory() {
+      let container = document.getElementById("results");
+      container.innerHTML = "";
+      history.forEach(item => {
+        let div = document.createElement("div");
+        div.className = "ball " + item.color;
+        div.textContent = item.num;
+        container.appendChild(div);
+      });
+    }
+
+    setInterval(update, 1000);
+    update();
+  </script>
+</body>
+</html>
