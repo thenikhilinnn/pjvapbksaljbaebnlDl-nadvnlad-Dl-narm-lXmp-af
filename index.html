@@ -111,7 +111,7 @@
   <h1>🎲 WinGo Full Demo</h1>
   <div id="number">?</div>
   <div id="timer">Next round in 30s</div>
-  <div class="wallet">💰 Balance: <span id="balance">1000</span></div>
+  <div class="wallet">💰 Balance: <span id="balance">1000000</span></div>
 
   <div class="bet-box">
     <h3>Place Your Bet</h3>
@@ -135,7 +135,7 @@
     let history = [];
     let userBet = null;
     let betAmount = 0;
-    let balance = 1000;
+    let balance = 100000;
 
     function getCurrentNumber() {
       let now = Date.now();
@@ -146,7 +146,7 @@
       if (num % 4 === 0) return "red";
       if (num % 4 === 1) return "green";
       if (num % 4 === 2) return "blue";
-      return "yellow";
+      return "black";
     }
 
     function placeBet(color) {
